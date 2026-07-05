@@ -1,6 +1,0 @@
-{
-  "is_main": true,
-  "import": [
-    { "path": "Rz-coder8848/moon-fsm", "alias": "fsm" }
-  ]
-}

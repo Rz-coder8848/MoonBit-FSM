@@ -1,4 +1,6 @@
 .moon/
+_build/
+**/pkg.generated.mbti
 target/
 *.o
 *.wasm

@@ -2,23 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [main]
   pull_request:
-    branches: [ master, main ]
+    branches: [main]
 
 jobs:
   build_and_test:
-    name: Build & Test
+    name: Build and Verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit
         run: curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
-      - name: Add MoonBit to Path
-        run: echo "$HOME/.moon/bin" >> $GITHUB_PATH
-      - name: Check Formatting
+      - name: Add MoonBit to PATH
+        run: echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - name: Check formatting
         run: moon fmt --check
-      - name: Run Type Check
+      - name: Run type check
         run: moon check
-      - name: Run Tests
+      - name: Run tests
         run: moon test
+      - name: Run acceptance gate
+        shell: pwsh
+        run: ./scripts/verify_acceptance.ps1 -SkipMooncakes
