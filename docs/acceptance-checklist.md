@@ -1,34 +1,39 @@
 # Acceptance Checklist
 
-This checklist is written for the OSC2026 acceptance phase and mirrors the
-public evidence a reviewer can verify from the repository itself.
+This checklist mirrors the public evidence a reviewer can verify from the
+repository itself for the OSC2026 acceptance phase.
 
 ## Repository
 
 - Public source repository is available on GitHub and mirrored on GitLink.
-- `README.md` explains the project goal, install path, examples, and
-  verification commands.
+- `README.md` explains project positioning, install path, verification
+  commands, and workflow-oriented capabilities.
 - `LICENSE` is present and uses an OSI-approved license.
-- `CHANGELOG.md` records post-2026-04-29 maintenance work.
+- `CHANGELOG.md` records the remediation release work after 2026-04-29.
+- `docs/release-alignment.md` records GitHub, GitLink, and Mooncakes alignment.
 
 ## Engineering Quality
 
 - `moon fmt --check` passes.
-- `moon check` passes.
-- `moon test` passes.
-- CI runs the same baseline checks on pushes to `main`.
+- `moon info` passes.
+- `moon check --deny-warn --target all` passes.
+- `moon test --deny-warn --target all` passes.
+- CI runs the same baseline checks on `main` across Linux, macOS, and Windows.
 - `_build/` and other generated outputs are not tracked.
 
 ## Usability
 
-- At least one minimal library example is documented in `README.md`.
-- Runnable examples exist under `examples/`.
-- `cmd/fsm-cli` provides a simple command-line demonstration.
-- `docs/api_reference.md` and `docs/architecture.md` describe the public API and
-  internal structure.
+- Runnable examples exist under `examples/`, including a composite approval
+  workflow scenario.
+- `cmd/fsm-cli` provides a command-line demonstration.
+- `docs/api_reference.md` and `docs/architecture.md` describe the public API,
+  runtime flow, error model, and validator report.
+- Mermaid output exposes guards and actions for reviewer inspection.
 
 ## Release Readiness
 
 - Package identity matches `Rz-coder8848/moon-fsm`.
+- The remediation target release is `0.1.1`.
 - Mooncakes publish steps are documented in `docs/release-checklist.md`.
-- `scripts/verify_acceptance.ps1` reports Mooncakes visibility once published.
+- `scripts/verify_acceptance.ps1` checks CI coverage, metadata alignment, and
+  Mooncakes version parity when publication verification is enabled.

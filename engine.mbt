@@ -11,33 +11,85 @@ pub fn[S, E, Ctx] Engine::context(self : Engine[S, E, Ctx]) -> Ctx {
 }
 
 ///|
+/// Returns the successful transition history.
+pub fn[S, E, Ctx] Engine::history(
+  self : Engine[S, E, Ctx],
+) -> Array[TransitionRecord[S, E]] {
+  self.history_entries
+}
+
+///|
+/// Returns the most recent transition error, if any.
+pub fn[S, E, Ctx] Engine::last_error(
+  self : Engine[S, E, Ctx],
+) -> TransitionError? {
+  self.last_error_value
+}
+
+///|
+fn[S, E, Ctx] fail_with(
+  engine : Engine[S, E, Ctx],
+  err : TransitionError,
+) -> Result[Unit, TransitionError] {
+  engine.last_error_value = Some(err)
+  Err(err)
+}
+
+///|
 /// Sends an event to the state machine engine to trigger a transition.
 pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::send(
   self : Engine[S, E, Ctx],
   event : E,
 ) -> Result[Unit, String] {
+  match self.try_send(event) {
+    Ok(_) => Ok(())
+    Err(err) => Err(format_transition_error(err))
+  }
+}
+
+///|
+/// Attempts a transition and returns a structured transition error on failure.
+pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::try_send(
+  self : Engine[S, E, Ctx],
+  event : E,
+) -> Result[Unit, TransitionError] {
+  match self.build_error {
+    Some(err) => return fail_with(self, err)
+    None => ()
+  }
+
   let current = self.current_state
   match self.transitions.get(current) {
-    None => Err("No transitions defined for current state")
+    None => fail_with(self, NoTransitionsForCurrentState)
     Some(state_map) =>
       match state_map.get(event) {
-        None => Err("Event not handled in current state")
+        None => fail_with(self, EventNotHandledInCurrentState)
         Some(next_state) => {
-          // Check guard condition if exists
-          let allowed = match self.guards.get(current) {
-            Some(evt_guards) =>
-              match evt_guards.get(event) {
-                Some(guard_cond) => guard_cond(current, event, self.context)
-                None => true
-              }
+          let guard_fn_opt = match self.guards.get(current) {
+            Some(state_guards) => state_guards.get(event)
+            None => None
+          }
+          let action_fn_opt = match self.actions.get(current) {
+            Some(state_actions) => state_actions.get(event)
+            None => None
+          }
+          let used_guard = guard_fn_opt is Some(_)
+          let used_action = action_fn_opt is Some(_)
+          let allowed = match guard_fn_opt {
+            Some(guard_fn) => guard_fn(current, event, self.context)
             None => true
           }
 
           if !allowed {
-            return Err("Transition blocked by guard condition")
+            return fail_with(self, GuardRejected)
           }
 
-          // Execute on_exit for current state
+          match action_fn_opt {
+            Some(action_fn) =>
+              self.context = action_fn(current, event, self.context)
+            None => ()
+          }
+
           match self.on_exit.get(current) {
             Some(cb) => cb(current, event, self.context)
             None => ()
@@ -45,12 +97,19 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::send(
 
           self.current_state = next_state
 
-          // Execute on_enter for next state
           match self.on_enter.get(next_state) {
             Some(cb) => cb(next_state, event, self.context)
             None => ()
           }
 
+          self.history_entries.push({
+            from: current,
+            event,
+            to: next_state,
+            used_guard,
+            used_action,
+          })
+          self.last_error_value = None
           Ok(())
         }
       }

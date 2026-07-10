@@ -2,22 +2,22 @@
 fn main {
   println("--- Vending Machine Example ---")
 
-  // Context holds the coin balance
   let builder : @fsm.Builder[String, String, Int] = @fsm.Builder::new()
-    .transition("Idle", "InsertCoin", "Counting")
-    // If balance >= 10, unlock
+    .transition_do("Idle", "InsertCoin", "Counting", fn(_s, _e, ctx) { ctx + 5 })
     .transition_if("Counting", "CheckBalance", "Unlocked", fn(_s, _e, ctx) {
       ctx >= 10
     })
-    // If balance < 10, go back to idle waiting for more
     .transition_if("Counting", "CheckBalance", "Idle", fn(_s, _e, ctx) {
       ctx < 10
     })
-    .transition("Unlocked", "Dispense", "Idle")
+    .transition_do("Unlocked", "Dispense", "Idle", fn(_s, _e, _ctx) { 0 })
 
-  let _engine = builder.build("Idle", 0)
+  let engine = builder.build("Idle", 0)
+  ignore(engine.try_send("InsertCoin"))
+  ignore(engine.try_send("InsertCoin"))
+  ignore(engine.try_send("CheckBalance"))
 
-  // Note: Since context is immutable via value in MoonBit currently unless using mut, 
-  // in a real app context would be a struct with mutable fields.
+  println("State after payment: \{engine.state()}")
+  println("Context after payment: \{engine.context()}")
   println("Mermaid Diagram:\n" + @fsm.to_mermaid(builder))
 }

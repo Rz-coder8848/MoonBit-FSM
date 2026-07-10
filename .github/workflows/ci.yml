@@ -1,27 +1,57 @@
-name: CI
+name: Check and Test
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+  push:
+    branches:
+      - main
 
 jobs:
-  build_and_test:
-    name: Build and Verify
-    runs-on: ubuntu-latest
+  build:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install MoonBit
-        run: curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
-      - name: Add MoonBit to PATH
-        run: echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
-      - name: Check formatting
+        with:
+          persist-credentials: false
+
+      - name: Install MoonBit (Unix)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Install MoonBit (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+          irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Moon version
+        run: moon version --all
+
+      - name: Moon update
+        run: moon update
+
+      - name: moon fmt --check
         run: moon fmt --check
-      - name: Run type check
-        run: moon check
-      - name: Run tests
-        run: moon test
-      - name: Run acceptance gate
+
+      - name: moon info
+        run: moon info
+
+      - name: moon check --deny-warn --target all
+        run: moon check --deny-warn --target all
+
+      - name: moon test --deny-warn --target all
+        run: moon test --deny-warn --target all
+
+      - name: Acceptance gate
         shell: pwsh
         run: ./scripts/verify_acceptance.ps1 -SkipMooncakes

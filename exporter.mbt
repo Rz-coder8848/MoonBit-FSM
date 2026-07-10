@@ -1,6 +1,5 @@
 ///|
 /// Exports the FSM configuration as a Mermaid stateDiagram string.
-/// This allows developers to easily visualize their state machines.
 pub fn[S : Show, E : Show, Ctx] to_mermaid(
   builder : Builder[S, E, Ctx],
 ) -> String {
@@ -10,11 +9,12 @@ pub fn[S : Show, E : Show, Ctx] to_mermaid(
     let from_str = "\{t.from}"
     let to_str = "\{t.to}"
     let event_str = "\{t.event}"
-
-    // In Mermaid, states shouldn't have quotes, so we do basic cleanup if needed.
-    // For simplicity, we just use the raw string representations.
     let guard_suffix = match t.guard_cond {
-      Some(_) => " [Guard]"
+      Some(_) => " [guard]"
+      None => ""
+    }
+    let action_suffix = match t.action {
+      Some(_) => " [action]"
       None => ""
     }
 
@@ -26,6 +26,7 @@ pub fn[S : Show, E : Show, Ctx] to_mermaid(
       " : " +
       event_str +
       guard_suffix +
+      action_suffix +
       "\n"
   }
 

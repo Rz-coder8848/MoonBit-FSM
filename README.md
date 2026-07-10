@@ -1,40 +1,42 @@
 # MoonBit-FSM
 
-`moon-fsm` is a MoonBit finite state machine library for projects that need a
-small, readable transition model instead of a framework-heavy runtime. It
-focuses on three practical pieces of behavior:
-
-- typed state and event transitions
-- guard-based transition validation
-- Mermaid export for quick documentation and review
-
-This repository is being maintained as a CCF x MoonBit OSC2026 accepted
-project. The competition-related work in this repository is the engineering
-increment after 2026-04-29: API cleanup, examples, tests, CI, acceptance
-checks, and Mooncakes release preparation.
-
-## Why This Library
-
-Finite state machines are a good fit when business rules or interactive flows
-need to stay auditable. Typical use cases include:
-
-- command or workflow orchestration
-- game or simulation agents
-- UI or device state management
-- teaching materials for MoonBit control-flow patterns
-
-The library keeps the runtime small and pushes most of the complexity into a
-declarative `Builder`, so state diagrams and transition reviews stay easy to
-follow in code review.
+`moon-fsm` is an auditable finite state machine component for MoonBit projects
+that need workflow-style state progression without adopting a full BPM runtime.
+The remediation release for OSC2026 focuses on reviewable engineering value:
+structured transition errors, context-updating actions, execution history,
+validator reports, workflow-oriented examples, and reproducible CI.
 
 ## Package Identity
 
 - Module name: `Rz-coder8848/moon-fsm`
-- Package version: `0.1.0`
-- Repository: [Rz-coder8848/MoonBit-FSM](https://github.com/Rz-coder8848/MoonBit-FSM)
-- Mirror: [Douj/moon-fsm](https://gitlink.org.cn/Douj/moon-fsm)
+- Package version: `0.1.1`
+- GitHub: [Rz-coder8848/MoonBit-FSM](https://github.com/Rz-coder8848/MoonBit-FSM)
+- GitLink: [Douj/moon-fsm](https://gitlink.org.cn/Douj/moon-fsm)
 - License: Apache-2.0
-- Mooncakes: pending publication during acceptance completion
+- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.1.1](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
+
+## Why This Library
+
+Typical uses for this package include:
+
+- approval and review workflows
+- device and UI state orchestration
+- agent or simulation state control
+- teaching and documenting transition-heavy business rules
+
+The library keeps the public surface small while making the transition path
+auditable in code review and acceptance review.
+
+## Re-Review Capabilities
+
+- Typed builder API with guarded transitions and transition actions.
+- Structured runtime errors via `try_send(event) -> Result[Unit, TransitionError]`.
+- Compatibility layer via `send(event) -> Result[Unit, String]`.
+- Transition history through `history()`.
+- Validator reports for unreachable states, dead ends, duplicate transitions,
+  and states without outgoing edges.
+- Mermaid export with guard and action annotations.
+- Runnable workflow examples and acceptance-oriented CI.
 
 ## Install
 
@@ -46,54 +48,90 @@ moon add Rz-coder8848/moon-fsm
 
 ```moonbit
 let builder : @fsm.Builder[String, String, Int] = @fsm.Builder::new()
-  .transition("Idle", "InsertCoin", "Counting")
-  .transition_if("Counting", "CheckBalance", "Unlocked", fn(_s, _e, ctx) { ctx >= 10 })
-  .transition_if("Counting", "CheckBalance", "Idle", fn(_s, _e, ctx) { ctx < 10 })
-  .transition("Unlocked", "Dispense", "Idle")
+  .transition_do("Draft", "Submit", "Review", fn(_s, _e, ctx) { ctx + 1 })
+  .transition_if_do(
+    "Review",
+    "Approve",
+    "Approved",
+    fn(_s, _e, ctx) { ctx >= 2 },
+    fn(_s, _e, ctx) { ctx + 10 },
+  )
 
-let engine = builder.build("Idle", 0)
+let engine = builder.build("Draft", 1)
+ignore(engine.try_send("Submit"))
+```
 
-ignore(engine.send("InsertCoin"))
+## Workflow Example
+
+The remediation release adds a composite approval workflow example:
+
+```text
+stateDiagram-v2
+    Draft --> Review.Pending : Submit [action]
+    Review.Pending --> Review.Approved : Approve [guard] [action]
+    Review.Pending --> Review.Rework : RequestChanges
+    Review.Pending --> Cancelled : Cancel
+    Review.Pending --> Review.Rejected : Reject
+    Review.Rework --> Review.Pending : Resubmit [action]
+    Review.Rework --> Cancelled : Cancel
+    Review.Rejected --> Error.Validation : Escalate
+    Review.Approved --> Closed : Archive
+```
+
+Run it locally with:
+
+```bash
+moon run examples/approval_workflow
 ```
 
 ## Core API
 
-- `Builder::new()` creates a state machine description.
-- `transition()` adds a normal transition.
-- `transition_if()` adds a guarded transition.
-- `on_enter()` and `on_exit()` register lifecycle callbacks.
+- `Builder::new()` creates a workflow definition.
+- `transition()` and `transition_if()` add plain and guarded transitions.
+- `transition_do()` and `transition_if_do()` attach context-updating actions.
 - `build()` materializes an `Engine`.
-- `validate()` reports states that are unreachable from the chosen initial
-  state.
-- `to_mermaid()` exports the configured transitions as Mermaid text.
+- `try_send()` returns `TransitionError` values for structured handling.
+- `history()` returns successful transition records.
+- `last_error()` exposes the most recent runtime failure.
+- `validate_report()` summarizes reachability and duplicate-definition issues.
+- `to_mermaid()` exports reviewer-friendly diagrams.
 
 API details live in [docs/api_reference.md](docs/api_reference.md).
 
 ## Examples
 
-These examples are intended to be runnable review artifacts rather than
-marketing demos:
-
 - `moon run examples/traffic_light`
 - `moon run examples/vending_machine`
 - `moon run examples/game_npc`
+- `moon run examples/approval_workflow`
 - `moon run cmd/fsm-cli`
 
 ## Verification
 
-Local verification used for this repository:
+The current MoonBit 0.10.3-compatible verification set is:
 
 ```bash
-moon info
+moon version --all
 moon fmt --check
-moon check
-moon test
+moon info
+moon check --deny-warn --target all
+moon test --deny-warn --target all
 powershell -ExecutionPolicy Bypass -File scripts/verify_acceptance.ps1 -SkipMooncakes
+moon publish --dry-run
 ```
 
-`scripts/verify_acceptance.ps1` is the acceptance gate for repository
-completeness. It checks required files, MoonBit commands, tracked build
-artifacts, and Mooncakes visibility.
+`moon fmt --deny-warn` and `moon info --deny-warn` are not used because the
+current CLI does not expose those flags; the repository instead runs the
+equivalent supported checks above. On Windows machines without a system C
+compiler, local `moon test --deny-warn --target all` may stop at the `native`
+target; the CI workflow remains the source of truth for full multi-target
+coverage.
+
+## Release Alignment
+
+- `0.1.0` was the initial Mooncakes publication.
+- `0.1.1` is the OSC2026 re-review remediation release.
+- Release alignment details live in [docs/release-alignment.md](docs/release-alignment.md).
 
 ## Documentation
 
@@ -101,16 +139,15 @@ artifacts, and Mooncakes visibility.
 - [API reference](docs/api_reference.md)
 - [Acceptance checklist](docs/acceptance-checklist.md)
 - [Release checklist](docs/release-checklist.md)
+- [Release alignment](docs/release-alignment.md)
 
 ## Notes For Reviewers
 
-- The repository keeps both GitHub and GitLink public so acceptance reviewers
-  can inspect commit history on either platform.
+- GitHub and GitLink are both public review surfaces for the same codebase.
 - Generated build output is intentionally excluded from version control.
-- The checked-in competition material is [申报书.md](申报书.md); the proposal PDF is
-  not regenerated in this completion pass.
+- The checked-in competition material is [申报书.md](申报书.md).
 
 ## Contributing
 
 Small, reviewable changes are preferred. Before opening a PR, run the same
-local verification commands listed above and keep examples executable.
+verification commands listed above and keep examples executable.

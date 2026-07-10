@@ -11,8 +11,9 @@ fn main {
     .transition("Yellow", "PowerOutage", "Off")
     .transition("Off", "PowerRestore", "Red")
 
-  let isolated = @fsm.validate(builder, "Red")
-  println("Unreachable states: \{isolated.length()}")
+  let report = @fsm.validate_report(builder, "Red")
+  println("Unreachable states: \{report.unreachable_states.length()}")
+  println("Dead-end states: \{report.dead_end_states.length()}")
 
   println("Mermaid Diagram:\n" + @fsm.to_mermaid(builder))
 }

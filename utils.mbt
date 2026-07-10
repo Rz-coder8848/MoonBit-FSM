@@ -15,3 +15,15 @@ pub fn[S : Show, E : Show] format_transition_log(
 ) -> String {
   "Transition: \{from} --(\{event})--> \{to}"
 }
+
+///|
+/// Converts a structured transition error into a stable public string.
+pub fn format_transition_error(err : TransitionError) -> String {
+  match err {
+    NoTransitionsForCurrentState => "No transitions defined for current state"
+    EventNotHandledInCurrentState => "Event not handled in current state"
+    GuardRejected => "Transition blocked by guard condition"
+    DuplicateTransitionDefinition => "Duplicate transition definition detected"
+    InvalidConfiguration => "Invalid state machine configuration"
+  }
+}

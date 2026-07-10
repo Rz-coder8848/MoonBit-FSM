@@ -4,7 +4,19 @@ All notable project changes are documented here. For OSC2026 acceptance review,
 the most relevant work is the repository maintenance and release-hardening after
 2026-04-29.
 
-## [2026-07-05] Acceptance Completion Pass
+## [0.1.1] - 2026-07-10
+
+### Changed
+
+- repositioned the library as an auditable workflow-oriented FSM component
+- added structured transition errors and runtime history inspection
+- added transition actions and validator reports
+- added a composite approval workflow example and expanded test coverage
+- refreshed CI to use MoonBit 0.10.3-compatible verification commands
+- aligned repository docs with the published Mooncakes release story
+- prepared the repository for the OSC2026 re-review remediation release
+
+## [0.1.0] - 2026-07-05
 
 ### Changed
 

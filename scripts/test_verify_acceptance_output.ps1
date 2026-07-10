@@ -1,24 +1,88 @@
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $false
 
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $scriptPath = Join-Path $PSScriptRoot "verify_acceptance.ps1"
 if (!(Test-Path $scriptPath)) {
   throw "Missing acceptance script: $scriptPath"
 }
 
-$output = cmd /c "powershell -ExecutionPolicy Bypass -File `"$scriptPath`" 2>&1" | Out-String
+function Invoke-Verify([string]$ProjectRoot, [switch]$SkipMooncakes, [switch]$SkipCommands) {
+  $command = 'powershell -NoProfile -ExecutionPolicy Bypass -File "{0}" -ProjectRoot "{1}"' -f $scriptPath, $ProjectRoot
+  if ($SkipMooncakes) {
+    $command += " -SkipMooncakes"
+  }
+  if ($SkipCommands) {
+    $command += " -SkipCommands"
+  }
+  $rawOutput = cmd /c "$command 2>&1"
+  $exitCode = $LASTEXITCODE
+  return @{
+    Output = ($rawOutput | Out-String)
+    ExitCode = $exitCode
+  }
+}
 
+function New-FixtureRoot {
+  $root = Join-Path ([System.IO.Path]::GetTempPath()) ("moon-fsm-acceptance-" + [guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Force -Path $root | Out-Null
+  New-Item -ItemType Directory -Force -Path (Join-Path $root ".github\workflows") | Out-Null
+  New-Item -ItemType Directory -Force -Path (Join-Path $root "docs") | Out-Null
+  Copy-Item (Join-Path $repoRoot "README.md") (Join-Path $root "README.md")
+  Copy-Item (Join-Path $repoRoot "LICENSE") (Join-Path $root "LICENSE")
+  Copy-Item (Join-Path $repoRoot "CHANGELOG.md") (Join-Path $root "CHANGELOG.md")
+  Copy-Item (Join-Path $repoRoot "moon.mod") (Join-Path $root "moon.mod")
+  Copy-Item (Join-Path $repoRoot ".github\workflows\ci.yml") (Join-Path $root ".github\workflows\ci.yml")
+  Copy-Item (Join-Path $repoRoot "docs\release-alignment.md") (Join-Path $root "docs\release-alignment.md")
+  return $root
+}
+
+$baseline = Invoke-Verify -ProjectRoot $repoRoot -SkipMooncakes
 $requiredMarkers = @(
   "MoonBit version:",
+  "Moon info:",
   "Formatting:",
+  "Type check:",
   "Tests:",
-  "Tracked build artifacts:",
+  "CI coverage:",
+  "README release alignment:",
+  "Metadata alignment:",
   "Mooncakes search:"
 )
 
 foreach ($marker in $requiredMarkers) {
-  if ($output -notmatch [regex]::Escape($marker)) {
-    throw "Acceptance output missing marker: $marker`n$output"
+  if ($baseline.Output -notmatch [regex]::Escape($marker)) {
+    throw "Acceptance output missing marker: $marker`n$($baseline.Output)"
   }
 }
 
-Write-Host "Acceptance script output markers verified."
+$fixtureRoot = New-FixtureRoot
+try {
+  (Get-Content (Join-Path $fixtureRoot ".github\workflows\ci.yml") -Raw).
+    Replace("moon info", "moon-info-removed") |
+    Set-Content (Join-Path $fixtureRoot ".github\workflows\ci.yml")
+  $ciFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
+  if ($ciFailure.Output -notmatch "CI coverage: FAIL") {
+    throw "Expected CI coverage failure.`n$($ciFailure.Output)"
+  }
+
+  (Get-Content (Join-Path $fixtureRoot "README.md") -Raw).
+    Replace("Published on Mooncakes: [Rz-coder8848/moon-fsm v0.1.1]", "Published on Mooncakes: pending") |
+    Set-Content (Join-Path $fixtureRoot "README.md")
+  $readmeFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
+  if ($readmeFailure.Output -notmatch "README release alignment: FAIL") {
+    throw "Expected README alignment failure.`n$($readmeFailure.Output)"
+  }
+
+  (Get-Content (Join-Path $fixtureRoot "moon.mod") -Raw).
+    Replace('version = "0.1.1"', 'version = "9.9.9"') |
+    Set-Content (Join-Path $fixtureRoot "moon.mod")
+  $versionFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
+  if ($versionFailure.Output -notmatch "README release alignment: FAIL") {
+    throw "Expected version mismatch failure.`n$($versionFailure.Output)"
+  }
+} finally {
+  Remove-Item -Recurse -Force $fixtureRoot
+}
+
+Write-Host "Acceptance script output markers and failure modes verified."

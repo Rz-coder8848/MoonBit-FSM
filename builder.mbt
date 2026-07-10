@@ -1,5 +1,5 @@
 ///|
-/// A Builder for constructing Finite State Machines declaratively.
+/// A Builder for constructing finite state machines declaratively.
 pub(all) struct Builder[S, E, Ctx] {
   config : EngineConfig[S, E, Ctx]
 }
@@ -11,14 +11,20 @@ pub fn[S : Hash + Eq, E, Ctx] Builder::new() -> Builder[S, E, Ctx] {
 }
 
 ///|
-/// Adds a transition from a specific state to another triggered by an event.
+/// Adds a transition from one state to another triggered by an event.
 pub fn[S, E, Ctx] Builder::transition(
   self : Builder[S, E, Ctx],
   from : S,
   event : E,
   to : S,
 ) -> Builder[S, E, Ctx] {
-  self.config.transitions.push({ from, to, event, guard_cond: None })
+  self.config.transitions.push({
+    from,
+    to,
+    event,
+    guard_cond: None,
+    action: None,
+  })
   self
 }
 
@@ -31,7 +37,52 @@ pub fn[S, E, Ctx] Builder::transition_if(
   to : S,
   guard_cond : Guard[S, E, Ctx],
 ) -> Builder[S, E, Ctx] {
-  self.config.transitions.push({ from, to, event, guard_cond: Some(guard_cond) })
+  self.config.transitions.push({
+    from,
+    to,
+    event,
+    guard_cond: Some(guard_cond),
+    action: None,
+  })
+  self
+}
+
+///|
+/// Adds a transition with a context-updating action.
+pub fn[S, E, Ctx] Builder::transition_do(
+  self : Builder[S, E, Ctx],
+  from : S,
+  event : E,
+  to : S,
+  action : TransitionAction[S, E, Ctx],
+) -> Builder[S, E, Ctx] {
+  self.config.transitions.push({
+    from,
+    to,
+    event,
+    guard_cond: None,
+    action: Some(action),
+  })
+  self
+}
+
+///|
+/// Adds a guarded transition with a context-updating action.
+pub fn[S, E, Ctx] Builder::transition_if_do(
+  self : Builder[S, E, Ctx],
+  from : S,
+  event : E,
+  to : S,
+  guard_cond : Guard[S, E, Ctx],
+  action : TransitionAction[S, E, Ctx],
+) -> Builder[S, E, Ctx] {
+  self.config.transitions.push({
+    from,
+    to,
+    event,
+    guard_cond: Some(guard_cond),
+    action: Some(action),
+  })
   self
 }
 
@@ -58,6 +109,21 @@ pub fn[S : Hash + Eq, E, Ctx] Builder::on_exit(
 }
 
 ///|
+fn[S : Hash + Eq, V] ensure_state_map(
+  store : Map[S, V],
+  key : S,
+  default_value : V,
+) -> V {
+  match store.get(key) {
+    Some(existing) => existing
+    None => {
+      store.set(key, default_value)
+      default_value
+    }
+  }
+}
+
+///|
 /// Builds the FSM runtime engine starting at the given state.
 pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Builder::build(
   self : Builder[S, E, Ctx],
@@ -66,29 +132,29 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Builder::build(
 ) -> Engine[S, E, Ctx] {
   let transitions = {}
   let guards = {}
+  let actions = {}
+  let duplicate_transitions = duplicate_transition_entries(self)
 
   for t in self.config.transitions {
-    let state_map = match transitions.get(t.from) {
-      Some(m) => m
-      None => {
-        let m = {}
-        transitions.set(t.from, m)
-        m
-      }
+    let state_map = ensure_state_map(transitions, t.from, {})
+    if state_map.contains(t.event) {
+      continue
     }
+
     state_map.set(t.event, t.to)
 
     match t.guard_cond {
-      Some(g) => {
-        let state_guards = match guards.get(t.from) {
-          Some(m) => m
-          None => {
-            let m = {}
-            guards.set(t.from, m)
-            m
-          }
-        }
-        state_guards.set(t.event, g)
+      Some(guard_cond) => {
+        let state_guards = ensure_state_map(guards, t.from, {})
+        state_guards.set(t.event, guard_cond)
+      }
+      None => ()
+    }
+
+    match t.action {
+      Some(action) => {
+        let state_actions = ensure_state_map(actions, t.from, {})
+        state_actions.set(t.event, action)
       }
       None => ()
     }
@@ -97,9 +163,17 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Builder::build(
   {
     transitions,
     guards,
+    actions,
     on_enter: self.config.on_enter,
     on_exit: self.config.on_exit,
+    history_entries: [],
     current_state: initial_state,
     context: initial_context,
+    last_error_value: None,
+    build_error: if duplicate_transitions.length() > 0 {
+      Some(DuplicateTransitionDefinition)
+    } else {
+      None
+    },
   }
 }
