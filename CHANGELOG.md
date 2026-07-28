@@ -16,6 +16,15 @@ the most relevant work is the repository maintenance and release-hardening after
 - aligned repository docs with the published Mooncakes release story
 - prepared the repository for the OSC2026 re-review remediation release
 
+## [0.1.2-unreleased] - 2026-07-28
+
+### Changed
+
+- removed the duplicate `(state, event)` design from the vending machine example
+- added dedicated tests for lifecycle hook execution order
+- added dedicated tests for Mermaid export annotations
+- cleaned up empty map literals to pass strict warning gates on newer MoonBit toolchains
+
 ## [0.1.0] - 2026-07-05
 
 ### Changed

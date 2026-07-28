@@ -15,7 +15,7 @@ fn[S : Hash + Eq, E, Ctx] collect_states(
   builder : Builder[S, E, Ctx],
 ) -> Array[S] {
   let states = []
-  let seen = {}
+  let seen = Map([])
   for t in builder.config.transitions {
     push_unique(states, seen, t.from)
     push_unique(states, seen, t.to)
@@ -28,7 +28,7 @@ fn[S : Hash + Eq, E, Ctx] reachable_states(
   builder : Builder[S, E, Ctx],
   initial_state : S,
 ) -> Array[S] {
-  let reachable = {}
+  let reachable = Map([])
   let ordered = []
   let queue = [initial_state]
   let mut head = 0
@@ -71,13 +71,13 @@ fn[S : Hash + Eq, E, Ctx] find_unreachable_states(
   initial_state : S,
 ) -> Array[S] {
   let reachable = reachable_states(builder, initial_state)
-  let reachable_seen = {}
+  let reachable_seen = Map([])
   for state in reachable {
     reachable_seen.set(state, true)
   }
 
   let missing_states = []
-  let missing_seen = {}
+  let missing_seen = Map([])
   for state in collect_states(builder) {
     if !reachable_seen.contains(state) {
       push_unique(missing_states, missing_seen, state)
@@ -92,7 +92,7 @@ fn[S : Hash + Eq, E, Ctx] find_dead_end_states(
   initial_state : S,
 ) -> Array[S] {
   let dead_ends = []
-  let seen = {}
+  let seen = Map([])
   for state in reachable_states(builder, initial_state) {
     if !state_has_outgoing(builder, state) {
       push_unique(dead_ends, seen, state)
@@ -106,7 +106,7 @@ fn[S : Hash + Eq, E, Ctx] find_states_without_outgoing_edges(
   builder : Builder[S, E, Ctx],
 ) -> Array[S] {
   let states_without_edges = []
-  let seen = {}
+  let seen = Map([])
   for state in collect_states(builder) {
     if !state_has_outgoing(builder, state) {
       push_unique(states_without_edges, seen, state)

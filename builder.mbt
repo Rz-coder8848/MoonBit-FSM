@@ -7,7 +7,7 @@ pub(all) struct Builder[S, E, Ctx] {
 ///|
 /// Creates a new FSM Builder.
 pub fn[S : Hash + Eq, E, Ctx] Builder::new() -> Builder[S, E, Ctx] {
-  { config: { transitions: [], on_enter: {}, on_exit: {} } }
+  { config: { transitions: [], on_enter: Map([]), on_exit: Map([]) } }
 }
 
 ///|
@@ -130,13 +130,13 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Builder::build(
   initial_state : S,
   initial_context : Ctx,
 ) -> Engine[S, E, Ctx] {
-  let transitions = {}
-  let guards = {}
-  let actions = {}
+  let transitions = Map([])
+  let guards = Map([])
+  let actions = Map([])
   let duplicate_transitions = duplicate_transition_entries(self)
 
   for t in self.config.transitions {
-    let state_map = ensure_state_map(transitions, t.from, {})
+    let state_map = ensure_state_map(transitions, t.from, Map([]))
     if state_map.contains(t.event) {
       continue
     }
@@ -145,7 +145,7 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Builder::build(
 
     match t.guard_cond {
       Some(guard_cond) => {
-        let state_guards = ensure_state_map(guards, t.from, {})
+        let state_guards = ensure_state_map(guards, t.from, Map([]))
         state_guards.set(t.event, guard_cond)
       }
       None => ()
@@ -153,7 +153,7 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Builder::build(
 
     match t.action {
       Some(action) => {
-        let state_actions = ensure_state_map(actions, t.from, {})
+        let state_actions = ensure_state_map(actions, t.from, Map([]))
         state_actions.set(t.event, action)
       }
       None => ()

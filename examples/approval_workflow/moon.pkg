@@ -2,6 +2,4 @@ import {
   "Rz-coder8848/moon-fsm" @fsm,
 }
 
-options(
-  is_main: true,
-)
+pkgtype(kind: "executable")

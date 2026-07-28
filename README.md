@@ -36,6 +36,7 @@ auditable in code review and acceptance review.
 - Validator reports for unreachable states, dead ends, duplicate transitions,
   and states without outgoing edges.
 - Mermaid export with guard and action annotations.
+- Lifecycle hook coverage with explicit tests for `on_enter` / `on_exit`.
 - Runnable workflow examples and acceptance-oriented CI.
 
 ## Install
@@ -83,6 +84,11 @@ Run it locally with:
 ```bash
 moon run examples/approval_workflow
 ```
+
+The vending machine example was further revised after the formal acceptance
+feedback on July 17, 2026. It no longer relies on duplicate `(state, event)`
+definitions, and now demonstrates a blocked purchase attempt followed by a
+successful retry after more coins are inserted.
 
 ## Core API
 
