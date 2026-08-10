@@ -25,6 +25,10 @@ repository itself for the OSC2026 acceptance phase.
 
 - Runnable examples exist under `examples/`, including a composite approval
   workflow scenario.
+- `benchmarks/data/workflow_cases.csv` provides a checked-in, reproducible
+  scenario corpus across four workflow domains.
+- `moon run benchmarks` verifies the corpus against expected states, accepted
+  and rejected events, and transition history counts.
 - `cmd/fsm-cli` provides a command-line demonstration.
 - `docs/api_reference.md` and `docs/architecture.md` describe the public API,
   runtime flow, error model, and validator report.
@@ -33,7 +37,7 @@ repository itself for the OSC2026 acceptance phase.
 ## Release Readiness
 
 - Package identity matches `Rz-coder8848/moon-fsm`.
-- The remediation target release is `0.1.1`.
+- The final-acceptance hardening release is `0.1.2`.
 - Mooncakes publish steps are documented in `docs/release-checklist.md`.
 - `scripts/verify_acceptance.ps1` checks CI coverage, metadata alignment, and
   Mooncakes version parity when publication verification is enabled.

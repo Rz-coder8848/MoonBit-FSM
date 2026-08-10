@@ -9,11 +9,11 @@ validator reports, workflow-oriented examples, and reproducible CI.
 ## Package Identity
 
 - Module name: `Rz-coder8848/moon-fsm`
-- Package version: `0.1.1`
+- Package version: `0.1.2`
 - GitHub: [Rz-coder8848/MoonBit-FSM](https://github.com/Rz-coder8848/MoonBit-FSM)
 - GitLink: [Douj/moon-fsm](https://gitlink.org.cn/Douj/moon-fsm)
 - License: Apache-2.0
-- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.1.1](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
+- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.1.2](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
 
 ## Why This Library
 
@@ -37,6 +37,10 @@ auditable in code review and acceptance review.
   and states without outgoing edges.
 - Mermaid export with guard and action annotations.
 - Lifecycle hook coverage with explicit tests for `on_enter` / `on_exit`.
+- Four-domain benchmark corpus covering approval, order, device, and support
+  workflows with deterministic expected outcomes.
+- Boundary regression tests for empty machines, dead ends, blocked guards,
+  unknown events, duplicate definitions, history ordering, and empty exports.
 - Runnable workflow examples and acceptance-oriented CI.
 
 ## Install
@@ -85,6 +89,18 @@ Run it locally with:
 moon run examples/approval_workflow
 ```
 
+Run the reproducible workflow benchmark corpus:
+
+```bash
+moon run benchmarks
+```
+
+The benchmark is a scenario benchmark rather than a hardware-dependent
+throughput claim. Its input cases are checked in under
+[benchmarks/data/workflow_cases.csv](benchmarks/data/workflow_cases.csv), and
+the runner verifies expected final states, successful transitions, rejected
+events, and history lengths.
+
 The vending machine example was further revised after the formal acceptance
 feedback on July 17, 2026. It no longer relies on duplicate `(state, event)`
 definitions, and now demonstrates a blocked purchase attempt followed by a
@@ -123,6 +139,7 @@ moon info
 moon check --deny-warn --target all
 moon test --deny-warn --target all
 powershell -ExecutionPolicy Bypass -File scripts/verify_acceptance.ps1 -SkipMooncakes
+moon run benchmarks
 moon publish --dry-run
 ```
 
@@ -136,7 +153,9 @@ coverage.
 ## Release Alignment
 
 - `0.1.0` was the initial Mooncakes publication.
-- `0.1.1` is the OSC2026 re-review remediation release.
+- `0.1.1` was the first OSC2026 re-review remediation release.
+- `0.1.2` is the final-acceptance hardening release with benchmark data and
+  expanded boundary coverage.
 - Release alignment details live in [docs/release-alignment.md](docs/release-alignment.md).
 
 ## Documentation

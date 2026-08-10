@@ -16,10 +16,15 @@ the most relevant work is the repository maintenance and release-hardening after
 - aligned repository docs with the published Mooncakes release story
 - prepared the repository for the OSC2026 re-review remediation release
 
-## [0.1.2-unreleased] - 2026-07-28
+## [0.1.2] - 2026-08-11
 
 ### Changed
 
+- published the final-acceptance hardening release for OSC2026
+- added a reproducible four-domain workflow benchmark corpus and runner
+- added boundary regression coverage for empty machines, dead ends, blocked
+  guards, unknown events, duplicate definitions, history ordering, and empty
+  Mermaid exports
 - removed the duplicate `(state, event)` design from the vending machine example
 - added dedicated tests for lifecycle hook execution order
 - added dedicated tests for Mermaid export annotations

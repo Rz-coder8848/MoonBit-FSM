@@ -1,6 +1,6 @@
 name = "Rz-coder8848/moon-fsm"
 
-version = "0.1.1"
+version = "0.1.2"
 
 description = "A lightweight, type-safe finite state machine library for MoonBit."
 

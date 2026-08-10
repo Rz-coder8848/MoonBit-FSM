@@ -52,6 +52,9 @@ jobs:
       - name: moon test --deny-warn --target all
         run: moon test --deny-warn --target all
 
+      - name: workflow benchmark corpus
+        run: moon run benchmarks
+
       - name: Acceptance gate
         shell: pwsh
         run: ./scripts/verify_acceptance.ps1 -SkipMooncakes

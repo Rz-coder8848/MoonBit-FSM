@@ -13,6 +13,12 @@
 The remediation release keeps the runtime small while making acceptance-facing
 behavior explicit and testable.
 
+The 0.1.2 hardening release also checks the public behavior against a
+four-domain scenario corpus. The corpus covers approval, order, device, and
+support workflows, including success, cancellation, rejection, retry, fault,
+and unknown-event paths. It is intentionally deterministic so a reviewer can
+reproduce it with `moon run benchmarks` on any supported platform.
+
 ## Main Components
 
 ### Builder
@@ -105,3 +111,11 @@ runtime. Instead, it targets auditable workflow slices where:
 - Generated build output is not part of the reviewed source tree.
 - Duplicate transition definitions must be surfaced explicitly.
 - The acceptance workflow must be reproducible through docs, scripts, and CI.
+
+## Benchmark Boundary
+
+The checked-in benchmark is a behavioral scenario corpus, not a hardware
+throughput claim. Each case specifies an initial state, event sequence,
+expected final state, expected accepted/rejected event counts, and expected
+history length. The typed runner and CSV data are kept together so the input
+is inspectable and the executable assertion catches accidental behavior drift.

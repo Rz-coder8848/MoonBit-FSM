@@ -6,8 +6,10 @@ This document records the acceptance remediation release alignment for
 ## Version Timeline
 
 - `0.1.0`: initial Mooncakes publication and acceptance baseline.
-- `0.1.1`: OSC2026 re-review remediation release with workflow-oriented
+- `0.1.1`: first OSC2026 re-review remediation release with workflow-oriented
   features, expanded validation, refreshed CI, and repository alignment fixes.
+- `0.1.2`: final-acceptance hardening release with four-domain benchmark data,
+  deterministic runner checks, and expanded boundary regression tests.
 
 ## Public Endpoints
 

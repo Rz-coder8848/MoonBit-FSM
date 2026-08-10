@@ -148,3 +148,18 @@ action-bearing transitions are annotated inline.
 ### `format_transition_error(err)`
 
 Convert a structured `TransitionError` into a stable public string.
+
+## Boundary and Scenario Verification
+
+The root package includes regression tests for empty builders, terminal states,
+unknown events, guard rejection, duplicate definitions, lifecycle ordering,
+history ordering, and empty Mermaid output. The repository-level scenario
+runner additionally exercises 15 approval, order, device, and support cases:
+
+```bash
+moon test --deny-warn --target all
+moon run benchmarks
+```
+
+The benchmark cases are documented in
+[`benchmarks/data/workflow_cases.csv`](../benchmarks/data/workflow_cases.csv).

@@ -88,13 +88,16 @@ $requiredFiles = @(
   "LICENSE",
   "CHANGELOG.md",
   ".github/workflows/ci.yml",
-  "docs/release-alignment.md"
+  "docs/release-alignment.md",
+  "benchmarks/README.md",
+  "benchmarks/data/workflow_cases.csv"
 )
 
 $missingFiles = $requiredFiles | Where-Object { !(Test-Path $_) }
 $metadata = Get-ModuleMetadata
 $readmeContent = if (Test-Path "README.md") { Get-Content -Raw "README.md" } else { "" }
 $ciContent = if (Test-Path ".github/workflows/ci.yml") { Get-Content -Raw ".github/workflows/ci.yml" } else { "" }
+$licenseContent = if (Test-Path "LICENSE") { Get-Content -Raw "LICENSE" } else { "" }
 
 $versionStep = if ($SkipCommands) {
   @{ Name = "MoonBit version"; Ok = $true; Output = "Skipped by request." }
@@ -133,12 +136,19 @@ $testStep = if ($SkipCommands) {
   }
 }
 
+$benchmarkStep = if ($SkipCommands) {
+  @{ Name = "Workflow benchmark"; Ok = $true; Output = "Skipped by request." }
+} else {
+  Invoke-Step "Workflow benchmark" { moon run benchmarks }
+}
+
 $trackedBuildArtifacts = Get-TrackedBuildArtifacts
 $ciRequiredPatterns = @(
   "moon fmt --check",
   "moon info",
   "moon check --deny-warn --target all",
-  "moon test --deny-warn --target all"
+  "moon test --deny-warn --target all",
+  "moon run benchmarks"
 )
 $ciMissingPatterns = Test-RequiredPatterns $ciContent $ciRequiredPatterns
 $ciStep = @{
@@ -178,6 +188,16 @@ $metadataStep = @{
   }
 }
 
+$licenseStep = @{
+  Name = "License compliance"
+  Ok = ($licenseContent -match "Apache License" -and $readmeContent -match "License: Apache-2.0")
+  Output = if ($licenseContent -match "Apache License" -and $readmeContent -match "License: Apache-2.0") {
+    "Apache-2.0 license file and README marker are present."
+  } else {
+    "LICENSE or README Apache-2.0 marker is missing."
+  }
+}
+
 $mooncakesUrl = "https://mooncakes.io/api/v0/modules/$($metadata.Name)"
 $mooncakesStep = if ($SkipMooncakes) {
   @{
@@ -205,6 +225,8 @@ Write-Section "Type check:" ($(if ($checkStep.Ok) { "PASS" } else { "FAIL" }))
 Write-Host $checkStep.Output
 Write-Section "Tests:" ($(if ($testStep.Ok) { "PASS" } else { "FAIL" }))
 Write-Host $testStep.Output
+Write-Section "Workflow benchmark:" ($(if ($benchmarkStep.Ok) { "PASS" } else { "FAIL" }))
+Write-Host $benchmarkStep.Output
 Write-Section "Required files:" ($(if ($missingFiles.Count -eq 0) { "PASS" } else { "FAIL" }))
 if ($missingFiles.Count -eq 0) {
   Write-Host (($requiredFiles -join ", ") + " are present.")
@@ -223,6 +245,8 @@ Write-Section "README release alignment:" ($(if ($readmeStep.Ok) { "PASS" } else
 Write-Host $readmeStep.Output
 Write-Section "Metadata alignment:" ($(if ($metadataStep.Ok) { "PASS" } else { "FAIL" }))
 Write-Host $metadataStep.Output
+Write-Section "License compliance:" ($(if ($licenseStep.Ok) { "PASS" } else { "FAIL" }))
+Write-Host $licenseStep.Output
 Write-Section "Mooncakes search:" ($(if ($mooncakesStep.Ok) { "PASS" } else { "FAIL" }))
 if ($mooncakesStep.Ok) {
   if ($SkipMooncakes) {
@@ -240,11 +264,13 @@ $hasFailure = @(
   -not $formatStep.Ok,
   -not $checkStep.Ok,
   -not $testStep.Ok,
+  -not $benchmarkStep.Ok,
   $missingFiles.Count -ne 0,
   $trackedBuildArtifacts.Count -ne 0,
   -not $ciStep.Ok,
   -not $readmeStep.Ok,
   -not $metadataStep.Ok,
+  -not $licenseStep.Ok,
   -not $mooncakesStep.Ok
 ) -contains $true
 

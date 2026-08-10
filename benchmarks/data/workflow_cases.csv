@@ -1,0 +1,16 @@
+id,family,initial,events,expected_state,successes,rejections
+approval-happy-path,approval,Draft,Submit|Approve|Archive,Closed,3,0
+approval-guard-retry,approval,Draft,Submit|Approve|RequestChanges|Resubmit|Approve|Archive,Closed,5,1
+approval-cancel,approval,Draft,Submit|Cancel,Cancelled,2,0
+approval-error-escalation,approval,Draft,Submit|Reject|Escalate,Error.Validation,3,0
+order-delivery,order,Created,Pay|Ship|Deliver,Delivered,3,0
+order-cancel,order,Created,Pay|Cancel,Cancelled,2,0
+order-invalid-retry,order,Created,Ship|Pay|Ship|Return,Returned,3,1
+order-return-boundary,order,Shipped,Return|Deliver,Returned,1,1
+device-start-stop,device,Offline,Boot|Start|Stop,Ready,3,0
+device-fault-recovery,device,Offline,Boot|Start|Fault|Reset|Start,Running,5,0
+device-invalid-boot,device,Running,Boot|Fault|Reset|Stop,Ready,2,2
+support-resolution,support,Open,Assign|Resolve|Close,Closed,3,0
+support-escalation,support,Open,Assign|Escalate|Resolve,Resolved,3,0
+support-reopen,support,Open,Assign|Resolve|Reopen|Assign|Resolve,Resolved,5,0
+support-unknown-event,support,Open,Close|Assign|Resolve,Resolved,2,1

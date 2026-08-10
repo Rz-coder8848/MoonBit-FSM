@@ -28,12 +28,15 @@ function New-FixtureRoot {
   New-Item -ItemType Directory -Force -Path $root | Out-Null
   New-Item -ItemType Directory -Force -Path (Join-Path $root ".github\workflows") | Out-Null
   New-Item -ItemType Directory -Force -Path (Join-Path $root "docs") | Out-Null
+  New-Item -ItemType Directory -Force -Path (Join-Path $root "benchmarks\data") | Out-Null
   Copy-Item (Join-Path $repoRoot "README.md") (Join-Path $root "README.md")
   Copy-Item (Join-Path $repoRoot "LICENSE") (Join-Path $root "LICENSE")
   Copy-Item (Join-Path $repoRoot "CHANGELOG.md") (Join-Path $root "CHANGELOG.md")
   Copy-Item (Join-Path $repoRoot "moon.mod") (Join-Path $root "moon.mod")
   Copy-Item (Join-Path $repoRoot ".github\workflows\ci.yml") (Join-Path $root ".github\workflows\ci.yml")
   Copy-Item (Join-Path $repoRoot "docs\release-alignment.md") (Join-Path $root "docs\release-alignment.md")
+  Copy-Item (Join-Path $repoRoot "benchmarks\README.md") (Join-Path $root "benchmarks\README.md")
+  Copy-Item (Join-Path $repoRoot "benchmarks\data\workflow_cases.csv") (Join-Path $root "benchmarks\data\workflow_cases.csv")
   return $root
 }
 
@@ -44,9 +47,11 @@ $requiredMarkers = @(
   "Formatting:",
   "Type check:",
   "Tests:",
+  "Workflow benchmark:",
   "CI coverage:",
   "README release alignment:",
   "Metadata alignment:",
+  "License compliance:",
   "Mooncakes search:"
 )
 
@@ -67,7 +72,7 @@ try {
   }
 
   (Get-Content (Join-Path $fixtureRoot "README.md") -Raw).
-    Replace("Published on Mooncakes: [Rz-coder8848/moon-fsm v0.1.1]", "Published on Mooncakes: pending") |
+    Replace("Published on Mooncakes: [Rz-coder8848/moon-fsm v0.1.2]", "Published on Mooncakes: pending") |
     Set-Content (Join-Path $fixtureRoot "README.md")
   $readmeFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
   if ($readmeFailure.Output -notmatch "README release alignment: FAIL") {
@@ -75,7 +80,7 @@ try {
   }
 
   (Get-Content (Join-Path $fixtureRoot "moon.mod") -Raw).
-    Replace('version = "0.1.1"', 'version = "9.9.9"') |
+    Replace('version = "0.1.2"', 'version = "9.9.9"') |
     Set-Content (Join-Path $fixtureRoot "moon.mod")
   $versionFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
   if ($versionFailure.Output -notmatch "README release alignment: FAIL") {
