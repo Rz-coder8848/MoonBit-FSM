@@ -1,4 +1,5 @@
 .moon/
+.worktrees/
 _build/
 **/pkg.generated.mbti
 target/
