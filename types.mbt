@@ -48,6 +48,59 @@ pub(all) enum TransitionError {
 } derive(Eq)
 
 ///|
+/// The result of one event attempt in an ordered batch dispatch.
+pub(all) struct DispatchOutcome[E] {
+  event : E
+  success : Bool
+  error : TransitionError?
+}
+
+///|
+/// Summary of an ordered, best-effort event batch.
+pub(all) struct BatchReport[E] {
+  outcomes : Array[DispatchOutcome[E]]
+  successful : Int
+  rejected : Int
+  complete : Bool
+}
+
+///|
+/// Runtime counters for successful and rejected event attempts.
+pub(all) struct ExecutionMetrics {
+  mut attempted : Int
+  mut successful : Int
+  mut rejected : Int
+  mut guard_rejected : Int
+  mut unknown_event : Int
+  mut no_outgoing_state : Int
+  mut duplicate_configuration : Int
+  mut invalid_configuration : Int
+  mut lifecycle_hooks : Int
+} derive(Eq)
+
+///|
+/// Complete audit entry for one event attempt.
+pub(all) struct AuditRecord[S, E] {
+  from : S
+  to : S
+  event : E
+  success : Bool
+  error : TransitionError?
+  history_index : Int?
+}
+
+///|
+/// A restorable boundary for an engine's observable runtime state.
+pub(all) struct EngineSnapshot[S, E, Ctx] {
+  state : S
+  context : Ctx
+  mut history_entries : Array[TransitionRecord[S, E]]
+  audit_entries : Array[AuditRecord[S, E]]
+  metrics : ExecutionMetrics
+  last_error : TransitionError?
+}
+
+///|
 /// Structured validation output for repository acceptance and reviewer audits.
 pub(all) struct ValidationReport[S, E] {
   unreachable_states : Array[S]
@@ -72,7 +125,9 @@ pub(all) struct Engine[S, E, Ctx] {
   actions : Map[S, Map[E, TransitionAction[S, E, Ctx]]]
   on_enter : Map[S, Callback[S, E, Ctx]]
   on_exit : Map[S, Callback[S, E, Ctx]]
-  history_entries : Array[TransitionRecord[S, E]]
+  mut history_entries : Array[TransitionRecord[S, E]]
+  mut audit_entries : Array[AuditRecord[S, E]]
+  mut metrics_value : ExecutionMetrics
   mut current_state : S
   mut context : Ctx
   mut last_error_value : TransitionError?

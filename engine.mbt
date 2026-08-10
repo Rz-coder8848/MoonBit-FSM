@@ -29,9 +29,12 @@ pub fn[S, E, Ctx] Engine::last_error(
 ///|
 fn[S, E, Ctx] fail_with(
   engine : Engine[S, E, Ctx],
+  current : S,
+  event : E,
   err : TransitionError,
 ) -> Result[Unit, TransitionError] {
   engine.last_error_value = Some(err)
+  engine.record_failure(current, event, err)
   Err(err)
 }
 
@@ -54,16 +57,16 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::try_send(
   event : E,
 ) -> Result[Unit, TransitionError] {
   match self.build_error {
-    Some(err) => return fail_with(self, err)
+    Some(err) => return fail_with(self, self.current_state, event, err)
     None => ()
   }
 
   let current = self.current_state
   match self.transitions.get(current) {
-    None => fail_with(self, NoTransitionsForCurrentState)
+    None => fail_with(self, current, event, NoTransitionsForCurrentState)
     Some(state_map) =>
       match state_map.get(event) {
-        None => fail_with(self, EventNotHandledInCurrentState)
+        None => fail_with(self, current, event, EventNotHandledInCurrentState)
         Some(next_state) => {
           let guard_fn_opt = match self.guards.get(current) {
             Some(state_guards) => state_guards.get(event)
@@ -81,7 +84,7 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::try_send(
           }
 
           if !allowed {
-            return fail_with(self, GuardRejected)
+            return fail_with(self, current, event, GuardRejected)
           }
 
           match action_fn_opt {
@@ -91,17 +94,24 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::try_send(
           }
 
           match self.on_exit.get(current) {
-            Some(cb) => cb(current, event, self.context)
+            Some(cb) => {
+              self.record_hook()
+              cb(current, event, self.context)
+            }
             None => ()
           }
 
           self.current_state = next_state
 
           match self.on_enter.get(next_state) {
-            Some(cb) => cb(next_state, event, self.context)
+            Some(cb) => {
+              self.record_hook()
+              cb(next_state, event, self.context)
+            }
             None => ()
           }
 
+          let history_index = self.history_entries.length()
           self.history_entries.push({
             from: current,
             event,
@@ -109,6 +119,7 @@ pub fn[S : Hash + Eq, E : Hash + Eq, Ctx] Engine::try_send(
             used_guard,
             used_action,
           })
+          self.record_success(current, event, next_state, history_index)
           self.last_error_value = None
           Ok(())
         }
