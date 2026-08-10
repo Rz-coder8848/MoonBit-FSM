@@ -90,7 +90,12 @@ $requiredFiles = @(
   ".github/workflows/ci.yml",
   "docs/release-alignment.md",
   "benchmarks/README.md",
-  "benchmarks/data/workflow_cases.csv"
+  "benchmarks/data/workflow_cases.csv",
+  "examples/order_workflow/main.mbt",
+  "examples/order_workflow/moon.pkg",
+  "audit_test.mbt",
+  "batch_test.mbt",
+  "snapshot_test.mbt"
 )
 
 $missingFiles = $requiredFiles | Where-Object { !(Test-Path $_) }
@@ -142,13 +147,20 @@ $benchmarkStep = if ($SkipCommands) {
   Invoke-Step "Workflow benchmark" { moon run benchmarks }
 }
 
+$orderExampleStep = if ($SkipCommands) {
+  @{ Name = "Order workflow example"; Ok = $true; Output = "Skipped by request." }
+} else {
+  Invoke-Step "Order workflow example" { moon run examples/order_workflow }
+}
+
 $trackedBuildArtifacts = Get-TrackedBuildArtifacts
 $ciRequiredPatterns = @(
   "moon fmt --check",
   "moon info",
   "moon check --deny-warn --target all",
   "moon test --deny-warn --target all",
-  "moon run benchmarks"
+  "moon run benchmarks",
+  "moon run examples/order_workflow"
 )
 $ciMissingPatterns = Test-RequiredPatterns $ciContent $ciRequiredPatterns
 $ciStep = @{
@@ -227,6 +239,8 @@ Write-Section "Tests:" ($(if ($testStep.Ok) { "PASS" } else { "FAIL" }))
 Write-Host $testStep.Output
 Write-Section "Workflow benchmark:" ($(if ($benchmarkStep.Ok) { "PASS" } else { "FAIL" }))
 Write-Host $benchmarkStep.Output
+Write-Section "Order workflow example:" ($(if ($orderExampleStep.Ok) { "PASS" } else { "FAIL" }))
+Write-Host $orderExampleStep.Output
 Write-Section "Required files:" ($(if ($missingFiles.Count -eq 0) { "PASS" } else { "FAIL" }))
 if ($missingFiles.Count -eq 0) {
   Write-Host (($requiredFiles -join ", ") + " are present.")
@@ -265,6 +279,7 @@ $hasFailure = @(
   -not $checkStep.Ok,
   -not $testStep.Ok,
   -not $benchmarkStep.Ok,
+  -not $orderExampleStep.Ok,
   $missingFiles.Count -ne 0,
   $trackedBuildArtifacts.Count -ne 0,
   -not $ciStep.Ok,

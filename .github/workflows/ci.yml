@@ -55,6 +55,9 @@ jobs:
       - name: workflow benchmark corpus
         run: moon run benchmarks
 
+      - name: order workflow example
+        run: moon run examples/order_workflow
+
       - name: Acceptance gate
         shell: pwsh
         run: ./scripts/verify_acceptance.ps1 -SkipMooncakes

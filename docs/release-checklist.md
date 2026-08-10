@@ -17,7 +17,7 @@ multi-target `moon test --deny-warn --target all` check in CI and use
 ## Before Mooncakes Publish
 
 - Confirm `moon.mod` metadata matches the public repository.
-- Confirm `CHANGELOG.md` describes the `0.1.2` final-acceptance hardening release.
+- Confirm `CHANGELOG.md` describes the `0.2.0` workflow-runtime expansion release.
 - Confirm `README.md` package version and Mooncakes status match `moon.mod`.
 - Confirm no generated `_build/` files are staged.
 - Run `moon publish --dry-run`.
@@ -31,6 +31,6 @@ multi-target `moon test --deny-warn --target all` check in CI and use
 ## After Publish
 
 - Re-run `powershell -ExecutionPolicy Bypass -File scripts/verify_acceptance.ps1`.
-- Confirm README, `moon.mod`, and Mooncakes latest version are all `0.1.2`.
+- Confirm README, `moon.mod`, and Mooncakes latest version are all `0.2.0`.
 - Push the final synchronized commit to GitHub and GitLink.
 - Verify GitHub and GitLink both expose `main` as the reviewer-facing default branch.

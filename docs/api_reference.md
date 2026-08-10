@@ -49,6 +49,34 @@ Structured validation output containing:
 - `duplicate_transitions`
 - `states_without_outgoing_edges`
 
+### `DispatchOutcome[E]`
+
+One ordered batch result containing the original `event`, a `success` flag,
+and an optional structured `TransitionError`.
+
+### `BatchReport[E]`
+
+Batch summary containing all `outcomes`, plus `successful`, `rejected`, and
+`complete`. `try_send_all` is best-effort: later events are still attempted after an
+earlier rejection.
+
+### `ExecutionMetrics`
+
+Counters for attempted, successful, rejected, guard-rejected, unknown-event,
+terminal-state, duplicate-configuration, invalid-configuration, and lifecycle
+hook executions. `copy()` is used by read APIs to prevent accidental aliasing.
+
+### `AuditRecord[S, E]`
+
+An immutable view of one accepted or rejected attempt, including `from`, `to`,
+`event`, `success`, an optional error, and the successful `history_index`.
+
+### `EngineSnapshot[S, E, Ctx]`
+
+A complete checkpoint of state, context, history, audit log, metrics, and last
+error. Use `restore` for explicit compensation; snapshots are not persisted
+or serialized by the library.
+
 ### `Builder[S, E, Ctx]`
 
 Configuration object used to define the state machine before runtime.
@@ -112,6 +140,34 @@ Return successful `TransitionRecord` entries in execution order.
 
 Return the most recent `TransitionError`, if any.
 
+### `metrics()`
+
+Return a copy of current execution counters.
+
+### `audit_log()`
+
+Return a copy of accepted and rejected attempt records in execution order.
+
+### `reset_metrics()`
+
+Reset metrics and clear audit records without changing state, context, or
+successful history.
+
+### `checkpoint()`
+
+Capture a complete `EngineSnapshot`.
+
+### `restore(snapshot)`
+
+Restore a previously captured snapshot. This is the recommended primitive for
+compensating a best-effort batch when the caller decides the workflow unit
+must be rolled back.
+
+### `try_send_all(events)`
+
+Attempt an ordered array of events and return a `BatchReport`. Every event is
+represented in `outcomes`; rejected events do not stop later events.
+
 ### `try_send(event)`
 
 Attempt to process one event and return `Result[Unit, TransitionError]`.
@@ -153,8 +209,9 @@ Convert a structured `TransitionError` into a stable public string.
 
 The root package includes regression tests for empty builders, terminal states,
 unknown events, guard rejection, duplicate definitions, lifecycle ordering,
-history ordering, and empty Mermaid output. The repository-level scenario
-runner additionally exercises 15 approval, order, device, and support cases:
+history ordering, snapshots, batches, metrics, audit isolation, and empty
+Mermaid output. The repository-level scenario runner additionally exercises
+32 approval, order, device, and support cases:
 
 ```bash
 moon test --deny-warn --target all

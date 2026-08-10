@@ -15,7 +15,7 @@ pub fn[S, E, Ctx] Engine::context(self : Engine[S, E, Ctx]) -> Ctx {
 pub fn[S, E, Ctx] Engine::history(
   self : Engine[S, E, Ctx],
 ) -> Array[TransitionRecord[S, E]] {
-  self.history_entries
+  self.history_entries.copy()
 }
 
 ///|

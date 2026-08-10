@@ -86,3 +86,16 @@ test "audit log reads are isolated from engine storage" {
   entries.clear()
   inspect(engine.audit_log().length(), content="1")
 }
+
+///|
+test "history reads are isolated from engine storage" {
+  let builder : Builder[String, String, Unit] = Builder::new().transition(
+    "Idle", "Start", "Running",
+  )
+  let engine = builder.build("Idle", ())
+  ignore(engine.try_send("Start"))
+
+  let entries = engine.history()
+  entries.clear()
+  inspect(engine.history().length(), content="1")
+}

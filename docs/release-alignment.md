@@ -10,6 +10,9 @@ This document records the acceptance remediation release alignment for
   features, expanded validation, refreshed CI, and repository alignment fixes.
 - `0.1.2`: final-acceptance hardening release with four-domain benchmark data,
   deterministic runner checks, and expanded boundary regression tests.
+- `0.2.0`: workflow-runtime expansion release with checkpoint/restore,
+  best-effort batch dispatch, metrics, audit records, a 32-case corpus, and an
+  order workflow example.
 
 ## Public Endpoints
 

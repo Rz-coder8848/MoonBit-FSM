@@ -4,7 +4,7 @@ This directory is a deterministic scenario benchmark for `moon-fsm`. It is
 designed to make the project scope and behavior reviewable without depending
 on wall-clock timing, CPU model, or a network service.
 
-The checked-in CSV contains 15 representative workflow cases across four
+The checked-in CSV contains 32 representative workflow cases across four
 common engineering domains:
 
 - approval and review workflows
@@ -12,10 +12,10 @@ common engineering domains:
 - device boot, fault, and recovery flows
 - support ticket assignment, escalation, reopening, and closure
 
-Each case records the initial state, event sequence, expected final state,
-successful transition count, and rejected-event count. The executable runner
-in `main.mbt` uses the same cases as typed data and verifies the expected
-history length after every scenario.
+Each case records the initial state, initial context, event sequence, expected
+final state, successful transition count, and rejected-event count. The
+executable runner in `main.mbt` uses the same cases as typed data and verifies
+the expected history length and audit-entry count after every scenario.
 
 Run the benchmark from the module root:
 

@@ -4,6 +4,23 @@ All notable project changes are documented here. For OSC2026 acceptance review,
 the most relevant work is the repository maintenance and release-hardening after
 2026-04-29.
 
+## [0.2.0] - 2026-08-11
+
+### Changed
+
+- expanded the runtime with complete engine checkpoints and compensation-ready
+  restore
+- added ordered best-effort batch dispatch with per-event outcomes
+- added execution metrics and audit records for accepted and rejected attempts
+- added an executable order workflow example with guards, actions, lifecycle
+  hooks, error branches, and Mermaid export
+- expanded the deterministic workflow corpus from 15 to 32 cases and asserted
+  audit coverage for every event attempt
+- added focused regression tests for snapshots, batches, metrics, audit
+  isolation, and structured failure classification
+- updated CI and acceptance scripts to run and verify the expanded public
+  surface
+
 ## [0.1.1] - 2026-07-10
 
 ### Changed

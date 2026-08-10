@@ -7,13 +7,14 @@
 1. describe transitions with `Builder`
 2. validate topology with `validate_report`
 3. instantiate an `Engine`
-4. execute events through `try_send` or `send`
-5. inspect history and export Mermaid diagrams
+4. execute events through `try_send`, `send`, or `try_send_all`
+5. inspect history, audit records, metrics, and snapshots
+6. export Mermaid diagrams
 
 The remediation release keeps the runtime small while making acceptance-facing
 behavior explicit and testable.
 
-The 0.1.2 hardening release also checks the public behavior against a
+The 0.2.0 expansion also checks the public behavior against a 32-case,
 four-domain scenario corpus. The corpus covers approval, order, device, and
 support workflows, including success, cancellation, rejection, retry, fault,
 and unknown-event paths. It is intentionally deterministic so a reviewer can
@@ -43,6 +44,8 @@ Responsibilities:
 - optional action lookup tables
 - lifecycle callback maps
 - successful transition history
+- audit records for successful and rejected attempts
+- execution metrics
 - last transition error
 - build-time configuration error marker
 
@@ -57,6 +60,17 @@ Responsibilities:
 7. update `current_state`
 8. run `on_enter`
 9. append a `TransitionRecord` to history
+10. append an `AuditRecord` and update execution metrics
+
+Rejected attempts do not mutate state, context, or successful history. They do
+append an audit record and classify the failure in `ExecutionMetrics`. A
+`try_send_all(events)` call applies events in order and returns every outcome;
+it is deliberately best-effort rather than implicitly transactional.
+
+`checkpoint()` captures state, context, successful history, audit records,
+metrics, and the last error. `restore(snapshot)` restores all of those values,
+so callers can implement explicit compensation around a batch or a larger
+workflow unit.
 
 `send(event)` is intentionally kept as a compatibility wrapper that maps
 `TransitionError` to stable strings.
@@ -94,6 +108,11 @@ Public structured types introduced in the remediation release include:
 - `TransitionRecord[S, E]`
 - `DuplicateTransition[S, E]`
 - `ValidationReport[S, E]`
+- `DispatchOutcome[E]`
+- `BatchReport[E]`
+- `ExecutionMetrics`
+- `AuditRecord[S, E]`
+- `EngineSnapshot[S, E, Ctx]`
 
 ## Workflow Positioning
 
@@ -115,7 +134,8 @@ runtime. Instead, it targets auditable workflow slices where:
 ## Benchmark Boundary
 
 The checked-in benchmark is a behavioral scenario corpus, not a hardware
-throughput claim. Each case specifies an initial state, event sequence,
-expected final state, expected accepted/rejected event counts, and expected
-history length. The typed runner and CSV data are kept together so the input
-is inspectable and the executable assertion catches accidental behavior drift.
+throughput claim. Each case specifies an initial state, initial context, event
+sequence, expected final state, expected accepted/rejected event counts, and
+expected history and audit-entry lengths. The typed runner and CSV data are
+kept together so the input is inspectable and the executable assertion catches
+accidental behavior drift.
