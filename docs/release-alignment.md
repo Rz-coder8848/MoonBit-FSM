@@ -13,6 +13,8 @@ This document records the acceptance remediation release alignment for
 - `0.2.0`: workflow-runtime expansion release with checkpoint/restore,
   best-effort batch dispatch, metrics, audit records, a 32-case corpus, and an
   order workflow example.
+- `0.2.1`: MoonBit 0.10.3 compatibility patch for executable package
+  configuration; runtime behavior is unchanged.
 
 ## Public Endpoints
 

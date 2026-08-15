@@ -9,11 +9,11 @@ validator reports, workflow-oriented examples, and reproducible CI.
 ## Package Identity
 
 - Module name: `Rz-coder8848/moon-fsm`
-- Package version: `0.2.0`
+- Package version: `0.2.1`
 - GitHub: [Rz-coder8848/MoonBit-FSM](https://github.com/Rz-coder8848/MoonBit-FSM)
 - GitLink: [Douj/moon-fsm](https://gitlink.org.cn/Douj/moon-fsm)
 - License: Apache-2.0
-- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.2.0](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
+- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.2.1](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
 
 ## Why This Library
 
@@ -184,6 +184,8 @@ coverage.
 - `0.2.0` is the workflow-runtime expansion release with snapshots, batch
   dispatch, metrics, audit records, a 32-case corpus, and a runnable order
   workflow.
+- `0.2.1` is the MoonBit 0.10.3 compatibility patch for executable package
+  configuration.
 - Release alignment details live in [docs/release-alignment.md](docs/release-alignment.md).
 
 ## Documentation

@@ -4,6 +4,17 @@ All notable project changes are documented here. For OSC2026 acceptance review,
 the most relevant work is the repository maintenance and release-hardening after
 2026-04-29.
 
+## [0.2.1] - 2026-08-16
+
+### Fixed
+
+- replaced the MoonBit 0.10.4-only `pkgtype` declarations with the
+  MoonBit 0.10.3-compatible `options("is-main": true)` form
+- verified all executable examples, benchmark packages, and the CLI under
+  MoonBit 0.10.3
+- kept the `0.2.0` workflow-runtime behavior unchanged while aligning the
+  published package with the competition toolchain
+
 ## [0.2.0] - 2026-08-11
 
 ### Changed

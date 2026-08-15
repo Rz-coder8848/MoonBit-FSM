@@ -39,7 +39,8 @@ repository itself for the OSC2026 acceptance phase.
 ## Release Readiness
 
 - Package identity matches `Rz-coder8848/moon-fsm`.
-- The workflow-runtime expansion release is `0.2.0`.
+- The current MoonBit 0.10.3 compatibility release is `0.2.1`, following the
+  `0.2.0` workflow-runtime expansion.
 - Mooncakes publish steps are documented in `docs/release-checklist.md`.
 - `scripts/verify_acceptance.ps1` checks CI coverage, metadata alignment, and
   Mooncakes version parity when publication verification is enabled.

@@ -79,7 +79,7 @@ try {
   }
 
   (Get-Content (Join-Path $fixtureRoot "README.md") -Raw).
-    Replace("Published on Mooncakes: [Rz-coder8848/moon-fsm v0.2.0]", "Published on Mooncakes: pending") |
+    Replace("Published on Mooncakes: [Rz-coder8848/moon-fsm v0.2.1]", "Published on Mooncakes: pending") |
     Set-Content (Join-Path $fixtureRoot "README.md")
   $readmeFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
   if ($readmeFailure.Output -notmatch "README release alignment: FAIL") {
@@ -87,7 +87,7 @@ try {
   }
 
   (Get-Content (Join-Path $fixtureRoot "moon.mod") -Raw).
-    Replace('version = "0.2.0"', 'version = "9.9.9"') |
+    Replace('version = "0.2.1"', 'version = "9.9.9"') |
     Set-Content (Join-Path $fixtureRoot "moon.mod")
   $versionFailure = Invoke-Verify -ProjectRoot $fixtureRoot -SkipMooncakes -SkipCommands
   if ($versionFailure.Output -notmatch "README release alignment: FAIL") {
