@@ -10,7 +10,7 @@ jobs:
   build:
     env:
       # Keep CI aligned with the contest acceptance toolchain and local verification.
-      MOONBIT_INSTALL_VERSION: 0.10.3
+      MOONBIT_INSTALL_VERSION: 0.1.20260703
     permissions:
       contents: read
     strategy:
@@ -34,7 +34,7 @@ jobs:
         shell: pwsh
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-          $env:MOONBIT_INSTALL_VERSION = "0.10.3"
+          $env:MOONBIT_INSTALL_VERSION = "0.1.20260703"
           irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
