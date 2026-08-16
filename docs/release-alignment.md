@@ -15,6 +15,8 @@ This document records the acceptance remediation release alignment for
   order workflow example.
 - `0.2.1`: MoonBit 0.10.3 compatibility patch for executable package
   configuration; runtime behavior is unchanged.
+- `0.3.0`: reusable operational expansion with journals, SLA evaluation,
+  runbook review, incident response, and a 44-case benchmark corpus.
 
 ## Public Endpoints
 

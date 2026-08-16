@@ -31,3 +31,15 @@ support-unknown-event,support,Open,0,Close|Assign|Resolve,Resolved,2,1
 support-escalate-reopen,support,Open,0,Assign|Escalate|Resolve|Reopen|Assign|Resolve|Close,Closed,7,0
 support-close-too-early,support,Open,0,Close|Assign|Resolve,Resolved,2,1
 support-reopen-loop,support,Open,0,Assign|Resolve|Reopen|Assign|Resolve|Reopen|Assign|Resolve,Resolved,8,0
+support-triage-assignment-resolution,support,Open,0,Triage|Assign|Resolve,Resolved,3,0
+support-request-customer-reply,support,Open,0,Triage|Assign|RequestInfo|CustomerReply|Resolve,Resolved,5,0
+support-escalation-resolution,support,Open,0,Triage|Assign|Escalate|Resolve,Resolved,4,0
+support-escalation-reopen-close,support,Open,0,Triage|Assign|Escalate|Resolve|Reopen|Assign|Resolve|Close,Closed,8,0
+support-cancel-before-triage,support,Open,0,Cancel|Triage,Cancelled,1,1
+support-double-cancel,support,Open,0,Cancel|Cancel,Cancelled,1,1
+support-waiting-unknown-reply,support,Open,0,Triage|Assign|CustomerReply|RequestInfo|CustomerReply|Resolve,Resolved,5,1
+support-resolve-before-update,support,Open,0,Triage|Assign|Resolve,Resolved,3,0
+support-reopen-after-close,support,Open,0,Triage|Assign|Resolve|Close|Reopen,Closed,4,1
+support-escalate-without-assignment,support,Open,0,Triage|Escalate|Assign|Escalate|Resolve,Resolved,4,1
+support-long-reopen-loop,support,Open,0,Triage|Assign|Resolve|Reopen|Assign|Resolve|Reopen|Assign|Resolve|Close,Closed,10,0
+support-terminal-event-storm,support,Open,0,Triage|Assign|Resolve|Close|Resolve|Assign|Cancel,Closed,4,3

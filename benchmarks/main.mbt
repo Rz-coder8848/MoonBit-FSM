@@ -61,6 +61,12 @@ fn device_builder() -> @fsm.Builder[String, String, Int] {
 ///|
 fn support_builder() -> @fsm.Builder[String, String, Int] {
   @fsm.Builder::new()
+  .transition("Open", "Triage", "Triaged")
+  .transition("Triaged", "Assign", "InProgress")
+  .transition("InProgress", "RequestInfo", "WaitingCustomer")
+  .transition("WaitingCustomer", "CustomerReply", "InProgress")
+  .transition("Open", "Cancel", "Cancelled")
+  .transition("Triaged", "Cancel", "Cancelled")
   .transition_do("Open", "Assign", "InProgress", fn(_s, _e, ctx) { ctx + 1 })
   .transition("InProgress", "Resolve", "Resolved")
   .transition("InProgress", "Escalate", "Escalated")
@@ -447,7 +453,7 @@ fn run_scenario(case : Scenario) -> Bool {
 
 ///|
 fn main {
-  let cases = scenarios()
+  let cases = extend_scenarios(scenarios())
   let mut passed = 0
   for case in cases {
     if run_scenario(case) {

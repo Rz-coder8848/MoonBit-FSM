@@ -9,11 +9,11 @@ validator reports, workflow-oriented examples, and reproducible CI.
 ## Package Identity
 
 - Module name: `Rz-coder8848/moon-fsm`
-- Package version: `0.2.1`
+- Package version: `0.3.0`
 - GitHub: [Rz-coder8848/MoonBit-FSM](https://github.com/Rz-coder8848/MoonBit-FSM)
 - GitLink: [Douj/moon-fsm](https://gitlink.org.cn/Douj/moon-fsm)
 - License: Apache-2.0
-- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.2.1](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
+- Published on Mooncakes: [Rz-coder8848/moon-fsm v0.3.0](https://mooncakes.io/api/v0/modules/Rz-coder8848/moon-fsm)
 
 ## Why This Library
 
@@ -41,8 +41,18 @@ auditable in code review and acceptance review.
   and states without outgoing edges.
 - Mermaid export with guard and action annotations.
 - Lifecycle hook coverage with explicit tests for `on_enter` / `on_exit`.
-- Four-domain, 32-case benchmark corpus covering approval, order, device, and
+- Four-domain, 44-case benchmark corpus covering approval, order, device, and
   support workflows with deterministic expected outcomes.
+- Bounded retry policies and rejection budgets for integrations that need
+  explicit error-storm protection without hiding failures.
+- Graph analysis with cycle, branching, terminal-state, reachability, and
+  deterministic workflow-risk reports.
+- Operational journal with severity levels, ticket queries, acknowledgements,
+  audit-log ingestion, SLA evaluation, and closure-gate summaries.
+- Production incident-response and customer-support runbooks covering
+  escalation, mitigation, customer waiting, rollback, handover, and closure.
+- 44 deterministic benchmark scenarios and 52 executable tests across the
+  library, support-ticket, and incident-response domains.
 - Boundary regression tests for empty machines, dead ends, blocked guards,
   unknown events, duplicate definitions, history ordering, and empty exports.
 - Runnable workflow examples and acceptance-oriented CI.
@@ -153,6 +163,8 @@ API details live in [docs/api_reference.md](docs/api_reference.md).
 - `moon run examples/game_npc`
 - `moon run examples/approval_workflow`
 - `moon run examples/order_workflow`
+- `moon run examples/support_workflow`
+- `moon run examples/incident_workflow`
 - `moon run cmd/fsm-cli`
 
 ## Verification
@@ -186,6 +198,8 @@ coverage.
   workflow.
 - `0.2.1` is the MoonBit 0.10.3 compatibility patch for executable package
   configuration.
+- `0.3.0` adds reusable retry, rejection-budget, graph-analysis, operational
+  journal, SLA, support-ticket, incident-response, and runbook APIs.
 - Release alignment details live in [docs/release-alignment.md](docs/release-alignment.md).
 
 ## Documentation

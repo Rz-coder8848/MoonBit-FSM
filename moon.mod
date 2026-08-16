@@ -1,6 +1,6 @@
 name = "Rz-coder8848/moon-fsm"
 
-version = "0.2.1"
+version = "0.3.0"
 
 description = "An auditable, type-safe workflow state machine library for MoonBit."
 

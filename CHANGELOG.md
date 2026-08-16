@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 - 2026-08-16
+
+This release expands the reusable workflow surface beyond the original FSM
+runtime in response to OSC2026 engineering-scope feedback.
+
+- Added bounded retry policies, rejection budgets, graph analysis, and risk reports.
+- Added operational journals with severity, acknowledgement, ticket queries,
+  audit ingestion, SLA evaluation, and closure-gate helpers.
+- Added support-ticket and production incident-response runbooks with
+  escalation, rollback, handover, and postmortem paths.
+- Expanded the deterministic benchmark corpus from 32 to 44 scenarios and the
+  executable test suite to 52 cases.
+
 All notable project changes are documented here. For OSC2026 acceptance review,
 the most relevant work is the repository maintenance and release-hardening after
 2026-04-29.

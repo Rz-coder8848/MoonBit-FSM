@@ -60,6 +60,38 @@ Batch summary containing all `outcomes`, plus `successful`, `rejected`, and
 `complete`. `try_send_all` is best-effort: later events are still attempted after an
 earlier rejection.
 
+### `RetryPolicy` and `RetryReport[E]`
+
+`RetryPolicy::new(max_attempts, mode)` provides bounded retries for callers
+that can change external context between attempts. `RetryMode` supports
+`Never`, `GuardOnly`, `UnknownEventOnly`, and `Recoverable`. Every attempt is
+recorded in `RetryReport.attempts`; the API never sleeps or silently discards
+an error.
+
+### `BudgetReport[E]`
+
+`try_send_with_budget(events, rejection_budget)` protects an integration from
+an error storm. It processes events in order and reports `processed`,
+`successful`, `rejected`, and `stopped`. A rejection budget of zero stops at
+the first rejected event.
+
+### `GraphSummary[S]`
+
+`graph_summary(builder, initial_state)` reports state and transition counts,
+terminal states, branching states, reachable/unreachable states, cycles, and
+maximum exploration depth. `workflow_risk_score` provides a deterministic
+integer suitable for a review gate, not a production reliability guarantee.
+
+### `WorkflowJournal` and SLA helpers
+
+`WorkflowJournal` stores severity-labelled operational entries and supports
+`info`, `warning`, `error`, `critical`, `append_audit`, `acknowledge`,
+`acknowledge_ticket`, `for_ticket`, and `unacknowledged_incidents`. The query
+layer adds `JournalFilter`, `query_journal`, `summarize_ticket`, and level
+counts. `evaluate_sla` and `sla_status` use logical workflow steps rather than
+wall-clock time, keeping tests reproducible while allowing an application to
+map its own clock or scheduler to steps.
+
 ### `ExecutionMetrics`
 
 Counters for attempted, successful, rejected, guard-rejected, unknown-event,
@@ -209,9 +241,10 @@ Convert a structured `TransitionError` into a stable public string.
 
 The root package includes regression tests for empty builders, terminal states,
 unknown events, guard rejection, duplicate definitions, lifecycle ordering,
-history ordering, snapshots, batches, metrics, audit isolation, and empty
-Mermaid output. The repository-level scenario runner additionally exercises
-32 approval, order, device, and support cases:
+history ordering, snapshots, batches, metrics, audit isolation, retries,
+budgets, graph analysis, journal queries, SLA boundaries, and empty Mermaid
+output. The repository-level scenario runner additionally exercises 44
+approval, order, device, and support cases:
 
 ```bash
 moon test --deny-warn --target all

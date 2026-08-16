@@ -93,6 +93,10 @@ $requiredFiles = @(
   "benchmarks/data/workflow_cases.csv",
   "examples/order_workflow/main.mbt",
   "examples/order_workflow/moon.pkg",
+  "examples/support_workflow/main.mbt",
+  "examples/support_workflow/moon.pkg",
+  "examples/incident_workflow/main.mbt",
+  "examples/incident_workflow/moon.pkg",
   "audit_test.mbt",
   "batch_test.mbt",
   "snapshot_test.mbt"
@@ -153,6 +157,18 @@ $orderExampleStep = if ($SkipCommands) {
   Invoke-Step "Order workflow example" { moon run examples/order_workflow }
 }
 
+$supportExampleStep = if ($SkipCommands) {
+  @{ Name = "Support workflow example"; Ok = $true; Output = "Skipped by request." }
+} else {
+  Invoke-Step "Support workflow example" { moon run examples/support_workflow }
+}
+
+$incidentExampleStep = if ($SkipCommands) {
+  @{ Name = "Incident workflow example"; Ok = $true; Output = "Skipped by request." }
+} else {
+  Invoke-Step "Incident workflow example" { moon run examples/incident_workflow }
+}
+
 $trackedBuildArtifacts = Get-TrackedBuildArtifacts
 $ciRequiredPatterns = @(
   "moon fmt --check",
@@ -160,7 +176,9 @@ $ciRequiredPatterns = @(
   "moon check --deny-warn --target all",
   "moon test --deny-warn --target all",
   "moon run benchmarks",
-  "moon run examples/order_workflow"
+  "moon run examples/order_workflow",
+  "moon run examples/support_workflow",
+  "moon run examples/incident_workflow"
 )
 $ciMissingPatterns = Test-RequiredPatterns $ciContent $ciRequiredPatterns
 $ciStep = @{
@@ -241,6 +259,10 @@ Write-Section "Workflow benchmark:" ($(if ($benchmarkStep.Ok) { "PASS" } else { 
 Write-Host $benchmarkStep.Output
 Write-Section "Order workflow example:" ($(if ($orderExampleStep.Ok) { "PASS" } else { "FAIL" }))
 Write-Host $orderExampleStep.Output
+Write-Section "Support workflow example:" ($(if ($supportExampleStep.Ok) { "PASS" } else { "FAIL" }))
+Write-Host $supportExampleStep.Output
+Write-Section "Incident workflow example:" ($(if ($incidentExampleStep.Ok) { "PASS" } else { "FAIL" }))
+Write-Host $incidentExampleStep.Output
 Write-Section "Required files:" ($(if ($missingFiles.Count -eq 0) { "PASS" } else { "FAIL" }))
 if ($missingFiles.Count -eq 0) {
   Write-Host (($requiredFiles -join ", ") + " are present.")

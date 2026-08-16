@@ -14,11 +14,11 @@
 The remediation release keeps the runtime small while making acceptance-facing
 behavior explicit and testable.
 
-The 0.2.0 expansion also checks the public behavior against a 32-case,
-four-domain scenario corpus. The corpus covers approval, order, device, and
-support workflows, including success, cancellation, rejection, retry, fault,
-and unknown-event paths. It is intentionally deterministic so a reviewer can
-reproduce it with `moon run benchmarks` on any supported platform.
+The workflow expansion checks public behavior against a 44-case, four-domain
+scenario corpus. The corpus covers approval, order, device, support, customer
+waiting, incident escalation, rollback, and unknown-event paths. It is
+intentionally deterministic so a reviewer can reproduce it with
+`moon run benchmarks` on any supported platform.
 
 ## Main Components
 
@@ -93,6 +93,29 @@ inspection notes.
 `to_mermaid(builder)` keeps the documentation path close to the code path. Guard
 and action-bearing transitions are annotated inline so reviewers can see which
 edges contain validation or context updates.
+
+### Operational Journal and SLA Layer
+
+The journal layer is deliberately separate from the engine's generic audit
+records. `WorkflowJournal::append_audit` maps string-labelled audit records to
+severity-labelled operational entries, while query APIs support ticket-scoped
+views, acknowledgement, incident counts, and handover summaries. This gives a
+host application a stable adapter point for logs, dashboards, or a message
+queue without adding a network dependency to the core library.
+
+SLA evaluation uses logical steps. A host can increment elapsed steps from a
+timer, queue retry, business-day calendar, or test fixture, then call
+`evaluate_sla`. The result exposes remaining budget and breach causes, making
+boundary tests deterministic without embedding a particular clock in the FSM.
+
+### Runbook Composition
+
+The support-ticket and incident-response examples compose the same engine with
+domain context actions, graph review, bounded dispatch, journal ingestion,
+SLA checks, and runbook handover. They intentionally remain flat composite
+workflows rather than claiming to implement hierarchical states or a full BPM
+engine. This keeps the reusable boundary clear while demonstrating a path from
+state transitions to an auditable production workflow.
 
 ## Data Model
 

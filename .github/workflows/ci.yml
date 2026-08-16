@@ -75,6 +75,12 @@ jobs:
       - name: order workflow example
         run: moon run examples/order_workflow
 
+      - name: support workflow example
+        run: moon run examples/support_workflow
+
+      - name: incident workflow example
+        run: moon run examples/incident_workflow
+
       - name: Acceptance gate
         shell: pwsh
         run: ./scripts/verify_acceptance.ps1 -SkipMooncakes

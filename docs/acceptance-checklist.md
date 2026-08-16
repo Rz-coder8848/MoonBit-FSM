@@ -26,7 +26,7 @@ repository itself for the OSC2026 acceptance phase.
 - Runnable examples exist under `examples/`, including a composite approval
   workflow and an order workflow with batch compensation.
 - `benchmarks/data/workflow_cases.csv` provides a checked-in, reproducible
-  32-case scenario corpus across four workflow domains.
+  44-case scenario corpus across four workflow domains.
 - `moon run benchmarks` verifies the corpus against expected states, accepted
   and rejected events, transition history counts, and audit-entry counts.
 - Runtime tests cover actions, structured errors, snapshots, best-effort
@@ -39,7 +39,7 @@ repository itself for the OSC2026 acceptance phase.
 ## Release Readiness
 
 - Package identity matches `Rz-coder8848/moon-fsm`.
-- The current MoonBit 0.10.3 compatibility release is `0.2.1`, following the
+- The current MoonBit 0.10.3 compatibility release is `0.3.0`, following the
   `0.2.0` workflow-runtime expansion.
 - Mooncakes publish steps are documented in `docs/release-checklist.md`.
 - `scripts/verify_acceptance.ps1` checks CI coverage, metadata alignment, and
